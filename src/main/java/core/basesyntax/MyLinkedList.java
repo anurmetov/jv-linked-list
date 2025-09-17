@@ -5,7 +5,6 @@ import java.util.List;
 public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     private Node<T> head;
     private Node<T> tail;
-    private Node<T> current;
     private int size;
 
 
@@ -25,43 +24,110 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
 
     @Override
     public void add(T value) {
+        Node<T> newNode;
         if (size == 0) {
-            head = tail = new Node<>(null, null, value);
+            newNode = head = tail = new Node<>(null, null, value);
         } else {
-            current = new Node<>(null, tail, value);
-            tail.next = current;
-            tail = current;
+            newNode = new Node<>(null, tail, value);
+            tail.next = newNode;
+            tail = newNode;
         }
         size++;
     }
 
     @Override
     public void add(T value, int index) {
-
-        // Doesnt work
-        if (index == 0) {
-            head = tail = new Node<>(null, null, value);
-        } else {
-            current = new Node<>(tail.next, tail, value);
-            current.prev.next = current;
-            tail.prev = current;
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index);
         }
-        size++;
 
+        Node<T> newNode;
+
+        if (index == 0) {
+            newNode = new Node<>(head, null, value);
+            if (head != null) {
+                head.prev = newNode;
+            }
+            head = newNode;
+            if (tail == null) {
+                tail = newNode;
+            }
+        } else if (index == size) { // вставка в кінець
+            newNode = new Node<>(null, tail, value);
+            tail.next = newNode;
+            tail = newNode;
+        } else { // вставка в середину
+            Node<T> current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+            newNode = new Node<>(current, current.prev, value);
+            current.prev.next = newNode;
+            current.prev = newNode;
+        }
+
+        size++;
     }
 
     @Override
     public void addAll(List<T> list) {
+        if (list != null) {
+            for (T element : list) {
+                add(element);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
-        return (T) current;
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
+
+        Node<T> node = head;
+
+        for (int i = 0; i < index; i++) {
+            node = node.next;
+        }
+
+        return node.value;
     }
 
     @Override
     public T set(T value, int index) {
+
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
+
+        // TODO: Faxen hier lässt sich nicht tauschen sondern schiebt andere nach rechts
+
+        Node<T> newNode;
+
+        if (index == 0) {
+            newNode = new Node<>(head.next, null, value);
+            head = newNode;
+            if (tail == null) {
+                tail = newNode;
+            }
+        } else if (index == size) { // вставка в кінець
+            newNode = new Node<>(null, tail.prev, value);
+            tail.next = null;
+            tail.prev = null;
+        } else { // вставка в середину
+            Node<T> current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+            newNode = new Node<>(current, current.prev.next, value);
+            current.prev.next = newNode;
+            current.prev = null;
+        }
+
+        size++;
+
+
         return null;
     }
 
@@ -82,12 +148,13 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
         }
 
         StringBuilder result = new StringBuilder("[");
-        while (head != null) {
-            result.append(head.value);
-            if (head.next != null) {
+        Node<T> current = head;
+        while (current != null) {
+            result.append(current.value);
+            if (current.next != null) {
                 result.append(", ");
             }
-            head = head.next;
+            current = current.next;
         }
         result.append("]");
         return result.toString();
