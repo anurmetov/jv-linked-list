@@ -7,7 +7,7 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     private Node<T> tail;
     private int size;
 
-    class Node<T> {
+    static class Node<T> {
         private Node<T> next;
         private Node<T> prev;
         private T value;
@@ -23,7 +23,7 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     public void add(T value) {
         Node<T> newNode;
         if (size == 0) {
-            newNode = head = tail = new Node<>(null, null, value);
+            head = tail = new Node<>(null, null, value);
         } else {
             newNode = new Node<>(null, tail, value);
             tail.next = newNode;
@@ -75,7 +75,6 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
         if (index < 0 || index >= size) {
@@ -166,7 +165,6 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
                     current.next.prev = current.prev;
                 }
 
-                // Очистка ссылок
                 current.prev = null;
                 current.next = null;
 
