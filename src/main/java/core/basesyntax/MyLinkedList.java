@@ -7,19 +7,16 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     private Node<T> tail;
     private int size;
 
-
     class Node<T> {
-        Node<T> next;
-        Node<T> prev;
-        T value;
-
+        private Node<T> next;
+        private Node<T> prev;
+        private T value;
 
         public Node(Node<T> next, Node<T> prev, T value) {
             this.next = next;
             this.prev = prev;
             this.value = value;
         }
-
     }
 
     @Override
@@ -96,51 +93,92 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
 
     @Override
     public T set(T value, int index) {
-
-        if (index < 0 || index > size) {
+        if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index);
         }
 
-        // TODO: Faxen hier lässt sich nicht tauschen sondern schiebt andere nach rechts
-
-        Node<T> newNode;
-
-        if (index == 0) {
-            newNode = new Node<>(head.next, null, value);
-            head = newNode;
-            if (tail == null) {
-                tail = newNode;
-            }
-        } else if (index == size) { // вставка в кінець
-            newNode = new Node<>(null, tail.prev, value);
-            tail.next = null;
-            tail.prev = null;
-        } else { // вставка в середину
-            Node<T> current = head;
-            for (int i = 0; i < index; i++) {
-                current = current.next;
-            }
-            newNode = new Node<>(current, current.prev.next, value);
-            current.prev.next = newNode;
-            current.prev = null;
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
         }
 
-        size++;
-
-
-        return null;
+        T oldValue = current.value;
+        current.value = value;
+        return oldValue;
     }
 
     @Override
     public T remove(int index) {
-        return null;
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+
+        if (current.prev == null) {
+            head = current.next;
+            if (head != null) {
+                head.prev = null;
+            } else {
+                tail = null;
+            }
+
+        } else if (current.next == null) {
+            tail = current.prev;
+            tail.next = null;
+
+        } else {
+            current.prev.next = current.next;
+            current.next.prev = current.prev;
+        }
+        current.prev = null;
+        current.next = null;
+
+        size--;
+        return current.value;
     }
 
     @Override
     public boolean remove(T object) {
+        Node<T> current = head;
+
+        while (current != null) {
+            boolean match = (object == null && current.value == null)
+                    || (object != null && object.equals(current.value));
+
+            if (match) {
+                if (current.prev == null) {
+                    head = current.next;
+                    if (head != null) {
+                        head.prev = null;
+                    } else {
+                        tail = null;
+                    }
+
+                } else if (current.next == null) {
+                    tail = current.prev;
+                    tail.next = null;
+
+                } else {
+                    current.prev.next = current.next;
+                    current.next.prev = current.prev;
+                }
+
+                // Очистка ссылок
+                current.prev = null;
+                current.next = null;
+
+                size--;
+                return true;
+            }
+
+            current = current.next;
+        }
+
         return false;
     }
-
 
     public String toString() {
         if (head == null) {
